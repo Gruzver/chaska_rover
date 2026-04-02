@@ -35,15 +35,17 @@ def _xacro_to_urdf(xacro_path: str) -> str:
 
 
 # ── Constantes ────────────────────────────────────────────────────────────────
-# Pinocchio omite joints fijos (joint_7/end_effector, depth_camera_joint, joint_6 fijo)
-# → el vector q tiene 5 elementos en el mismo orden que aparecen en el URDF.
-JOINT_NAMES = ['joint_1', 'joint_2', 'joint_3', 'joint_4', 'joint_5']
+# joint_6 (gripper) es prismatic → Pinocchio lo incluye en su modelo (nv=6).
+# Usamos todos los 6 internamente para Pinocchio; solo los 5 primeros van al
+# arm_controller (joint_6 lo gestiona gripper_controller por separado).
+JOINT_NAMES = ['joint_1', 'joint_2', 'joint_3', 'joint_4', 'joint_5', 'joint_6']
+ARM_CTRL_JOINTS = JOINT_NAMES[:5]   # los que arm_controller acepta
 
 IDX_JOINT_4 = 3
 IDX_JOINT_5 = 4
 
-Q_MIN = np.array([-0.125, -1.5708, -1.5708, -1.5708, -1.5708])
-Q_MAX = np.array([ 0.125,  1.5708,  1.5708,  1.5708,  1.5708])
+Q_MIN = np.array([-0.125, -1.5708, -1.5708, -1.5708, -1.5708, -0.065])
+Q_MAX = np.array([ 0.125,  1.5708,  1.5708,  1.5708,  1.5708,  0.020])
 
 
 class JointVelocityNode(Node):
@@ -67,10 +69,14 @@ class JointVelocityNode(Node):
         self.get_logger().info(f'Generando URDF para Pinocchio: {xacro_path}')
         urdf_path  = _xacro_to_urdf(xacro_path)
         self.kin   = ArmKinematics(urdf_path)
+        self.get_logger().info(
+            f'Pinocchio cargado: nq={self.kin.nq} nv={self.kin.nv} '
+            f'joints={self.kin.model.names[1:]}'
+        )
 
-        # ── Estado articular (sincronizado desde /joint_states) ───────────────
-        self.q            = np.zeros(len(JOINT_NAMES))
-        self.dq           = np.zeros(len(JOINT_NAMES))
+        # ── Estado articular (tamaño nv=6 para Pinocchio) ────────────────────
+        self.q            = np.zeros(self.kin.nv)
+        self.dq           = np.zeros(self.kin.nv)
         self.q_ready      = False   # esperar primer /joint_states antes de actuar
 
         # ── Comandos recibidos ────────────────────────────────────────────────
@@ -117,8 +123,9 @@ class JointVelocityNode(Node):
             if name in name_to_pos:
                 self.q[i] = float(name_to_pos[name])
                 found += 1
-        if found == len(JOINT_NAMES):
+        if found == len(JOINT_NAMES) and not self.q_ready:
             self.q_ready = True
+            self.get_logger().info(f'joint_states sincronizado: q={np.round(self.q, 4)}')
 
     def _ee_vel_cb(self, msg: Vector3):
         self.v_ee_target   = np.array([msg.x, msg.y, msg.z])
@@ -170,17 +177,18 @@ class JointVelocityNode(Node):
         self._publish_telemetry()
 
     def _send_trajectory(self, q_target: np.ndarray):
-        """Envía un JointTrajectoryPoint al arm_controller."""
+        """Envía un JointTrajectoryPoint al arm_controller (joint_1..joint_5).
+
+        header.stamp = 0  →  time_from_start relativo a cuando llega el mensaje.
+        Lookahead 0.1 s: suficiente para latencia de red/sim sin sentirse lento.
+        joint_6 (gripper) lo gestiona gripper_controller; no se incluye aquí.
+        """
         traj = JointTrajectory()
-        traj.header.stamp  = self.get_clock().now().to_msg()
-        traj.joint_names   = JOINT_NAMES
+        traj.joint_names = ARM_CTRL_JOINTS   # solo los 5 primeros
 
         pt = JointTrajectoryPoint()
-        pt.positions       = q_target.tolist()
-        pt.velocities      = self.dq.tolist()
-        # Tiempo de llegada: 2 períodos de control (~40 ms a 50 Hz)
-        lookahead_ns = int(2 * self.dt * 1e9)
-        pt.time_from_start = Duration(sec=0, nanosec=lookahead_ns)
+        pt.positions       = q_target[:len(ARM_CTRL_JOINTS)].tolist()
+        pt.time_from_start = Duration(sec=0, nanosec=100_000_000)  # 0.1 s
 
         traj.points = [pt]
         self._traj_pub.publish(traj)
