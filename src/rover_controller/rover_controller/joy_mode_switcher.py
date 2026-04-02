@@ -163,7 +163,7 @@ class JoyModeSwitcher(Node):
             #   R1            → joint_6 abre  (gripper +)
             #   L1            → joint_6 cierra (gripper −)
             j4_vel = ax(AXIS_DPAD_Y) * WRIST_SPEED   # ↑↓ pitch
-            j5_vel = ax(AXIS_DPAD_X) * WRIST_SPEED   # ←→ roll
+            j5_vel = -ax(AXIS_DPAD_X) * WRIST_SPEED   # ←→ roll
             j6_vel = (btn(BTN_R1)         - btn(BTN_L1))         * GRIPPER_SPEED
 
             wrist = JointState()
