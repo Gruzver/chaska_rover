@@ -74,9 +74,14 @@ class JointVelocityNode(Node):
             f'joints={self.kin.model.names[1:]}'
         )
 
-        # ── Estado articular (tamaño nv=6 para Pinocchio) ────────────────────
+        # ── Estado articular ──────────────────────────────────────────────────
+        # self.q   : posición REAL, sincronizada desde /joint_states (para IK)
+        # self.q_cmd : posición COMANDADA, acumulada por integración (para JTC)
+        # Se usan por separado para evitar que el JTC considere cada micro-delta
+        # como "goal reached" y no avance.
         self.q            = np.zeros(self.kin.nv)
         self.dq           = np.zeros(self.kin.nv)
+        self.q_cmd        = None   # se inicializa en el primer /joint_states
         self.q_ready      = False   # esperar primer /joint_states antes de actuar
 
         # ── Comandos recibidos ────────────────────────────────────────────────
@@ -125,6 +130,7 @@ class JointVelocityNode(Node):
                 found += 1
         if found == len(JOINT_NAMES) and not self.q_ready:
             self.q_ready = True
+            self.q_cmd   = self.q.copy()   # inicializar acumulador desde posición real
             self.get_logger().info(f'joint_states sincronizado: q={np.round(self.q, 4)}')
 
     def _ee_vel_cb(self, msg: Vector3):
@@ -150,10 +156,10 @@ class JointVelocityNode(Node):
             return
 
         if self.estop:
-            self._send_trajectory(self.q)   # mantener posición actual
+            self._send_trajectory(self.q_cmd)   # mantener última posición comandada
             return
 
-        # IK de velocidad (joints 1-3 desde EE target)
+        # IK de velocidad — usa posición REAL para Jacobiano preciso
         dq = np.zeros(self.kin.nv)
         if self.ee_cmd_active:
             try:
@@ -170,10 +176,14 @@ class JointVelocityNode(Node):
 
         self.dq = dq
 
-        # Posición objetivo = posición actual + velocidad * dt, saturada
-        q_target = np.clip(self.q + dq * self.dt, Q_MIN, Q_MAX)
+        # Integrar q_cmd: acumulador independiente de la posición real.
+        # El JTC recibe siempre la posición TARGET acumulada, no un micro-delta.
+        # Cuando dq=0 (sin comando), q_cmd no cambia → el brazo mantiene posición.
+        has_command = self.ee_cmd_active or np.any(np.abs(self.dq_wrist) > 1e-6)
+        if has_command:
+            self.q_cmd = np.clip(self.q_cmd + dq * self.dt, Q_MIN, Q_MAX)
 
-        self._send_trajectory(q_target)
+        self._send_trajectory(self.q_cmd)
         self._publish_telemetry()
 
     def _send_trajectory(self, q_target: np.ndarray):
