@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<robot name="chaska_rover" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- ============================
+         IMU sensor
+         ============================ -->
+    <gazebo reference="imu">
+        <sensor name="imu_sensor" type="imu">
+            <always_on>true</always_on>
+            <update_rate>50</update_rate>
+            <topic>imu</topic>
+            <gz_frame_id>imu</gz_frame_id>
+        </sensor>
+    </gazebo>
+
+    <!-- ============================
+         3D LiDAR — Livox (simulado con gpu_lidar multicapa)
+         Horizontal 360°, 16 canales verticales -30°/+10°,
+         rango 100 m. El link está inclinado -10° en pitch
+         (laser_joint) para captar el suelo delante del rover.
+         En Ignition Fortress, gpu_lidar publica el PointCloud2
+         en {topic}/points → el bridge apunta a /livox/points.
+         ============================ -->
+    <gazebo reference="laser">
+        <sensor name="livox_lidar" type="gpu_lidar">
+            <always_on>true</always_on>
+            <update_rate>10</update_rate>
+            <topic>livox</topic>
+            <gz_frame_id>laser</gz_frame_id>
+            <lidar>
+                <scan>
+                    <horizontal>
+                        <samples>360</samples>
+                        <resolution>1</resolution>
+                        <min_angle>-3.14159</min_angle>
+                        <max_angle>3.14159</max_angle>
+                    </horizontal>
+                    <vertical>
+                        <samples>16</samples>
+                        <resolution>1</resolution>
+                        <min_angle>-0.5236</min_angle>
+                        <max_angle>0.1745</max_angle>
+                    </vertical>
+                </scan>
+                <range>
+                    <min>0.1</min>
+                    <max>100.0</max>
+                    <resolution>0.002</resolution>
+                </range>
+                <noise>
+                    <type>gaussian</type>
+                    <mean>0.0</mean>
+                    <stddev>0.002</stddev>
+                </noise>
+            </lidar>
+        </sensor>
+    </gazebo>
+
+    <!-- ============================
+         Cámara RGBD (RGB + profundidad + nube de puntos)
+         Un solo sensor rgbd_camera reemplaza los dos bloques
+         separados (camera + depth_camera) para evitar conflictos.
+         Requiere el plugin Sensors en el world (ogre2).
+         Publica:
+           camera/image       → RGB  (gz.msgs.Image)
+           camera/depth_image → depth (gz.msgs.Image)
+           camera/camera_info → calibración
+           camera/points      → PointCloud2 (gz.msgs.PointCloudPacked)
+         ============================ -->
+    <gazebo reference="camera">
+        <sensor name="rgbd_camera" type="rgbd_camera">
+            <always_on>true</always_on>
+            <update_rate>15</update_rate>
+            <topic>camera</topic>
+            <gz_frame_id>camera</gz_frame_id>
+            <camera>
+                <horizontal_fov>1.047</horizontal_fov>
+                <image>
+                    <width>640</width>
+                    <height>480</height>
+                    <format>R8G8B8</format>
+                </image>
+                <clip>
+                    <near>0.1</near>
+                    <far>10.0</far>
+                </clip>
+            </camera>
+        </sensor>
+    </gazebo>
+
+    <!-- ============================
+         Wheel friction (skid steer)
+         ============================ -->
+    <gazebo reference="front_left_wheel">
+        <mu1>1.0</mu1>
+        <mu2>1.0</mu2>
+        <kp>500000</kp>
+        <kd>10</kd>
+    </gazebo>
+    <gazebo reference="front_right_wheel">
+        <mu1>1.0</mu1>
+        <mu2>1.0</mu2>
+        <kp>500000</kp>
+        <kd>10</kd>
+    </gazebo>
+    <gazebo reference="rear_left_wheel">
+        <mu1>1.0</mu1>
+        <mu2>1.0</mu2>
+        <kp>500000</kp>
+        <kd>10</kd>
+    </gazebo>
+    <gazebo reference="rear_right_wheel">
+        <mu1>1.0</mu1>
+        <mu2>1.0</mu2>
+        <kp>500000</kp>
+        <kd>10</kd>
+    </gazebo>
+
+    <!-- ============================
+         ign_ros2_control system plugin
+         Omitido cuando with_control_plugin=false (uso en URDF unificado
+         chaska_robot.urdf.xacro, que provee su propio plugin único).
+         ============================ -->
+    <xacro:if value="$(arg with_control_plugin)">
+        <gazebo>
+            <plugin filename="libign_ros2_control-system.so"
+                    name="ign_ros2_control::IgnitionROS2ControlPlugin">
+                <parameters>$(find rover_description)/config/rover_controllers.yaml</parameters>
+            </plugin>
+        </gazebo>
+    </xacro:if>
+
+</robot>

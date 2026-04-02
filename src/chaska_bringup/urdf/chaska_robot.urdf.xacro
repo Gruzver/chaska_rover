@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<robot name="chaska_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- true para simulación (Gazebo), false para visualización (RViz) -->
+  <xacro:arg name="is_simulation" default="false"/>
+  <!-- Suprime el plugin ign_ros2_control individual del rover;
+       el URDF unificado provee un único plugin que gestiona todos los joints -->
+  <xacro:arg name="with_control_plugin" default="false"/>
+
+  <!-- ── Rover (base móvil) ─────────────────────────────────────────────── -->
+  <!-- Incluye: rover_base.xacro, rover_gazebo.xacro, rover_ros2_control.xacro -->
+  <xacro:include filename="$(find rover_description)/urdf/rover.urdf.xacro"/>
+
+  <!-- ── Brazo robótico ────────────────────────────────────────────────── -->
+  <!-- Incluye: chaska_arm_base.xacro (links/joints), chaska_arm_gazebo.xacro,
+       chaska_arm_ros2_control.xacro. El virtual_joint world→base_link fue
+       eliminado; el brazo se conecta al rover mediante arm_mount_joint. -->
+  <xacro:include filename="$(find chaska_arm_description)/urdf/chaska_arm.urdf.xacro"/>
+
+  <!-- ── Joint de montaje del brazo sobre el rover ─────────────────────── -->
+  <!-- El brazo se sitúa en la parte delantera-central del chasis.
+       Ajustar xyz según posición física real de montaje. -->
+  <joint name="arm_mount_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="arm_base_link"/>
+    <origin xyz="0.23 0.0 0.20" rpy="0 0 -1.5708"/>
+  </joint>
+
+  <!-- ── Plugin ign_ros2_control ÚNICO para rover + brazo ──────────────── -->
+  <!-- Se declara aquí (no en rover_gazebo.xacro ni chaska_arm_gazebo.xacro)
+       para que haya un solo controller_manager que gestione los 14 joints. -->
+  <gazebo>
+    <plugin filename="libign_ros2_control-system.so"
+            name="ign_ros2_control::IgnitionROS2ControlPlugin">
+      <parameters>$(find chaska_bringup)/config/chaska_controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+</robot>

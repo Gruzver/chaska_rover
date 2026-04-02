@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<robot name="chaska_rover" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <ros2_control name="RoverSystem" type="system">
+
+        <!-- SIMULATION: Gazebo System Interface -->
+        <xacro:if value="$(arg is_simulation)">
+            <hardware>
+                <plugin>ign_ros2_control/IgnitionSystem</plugin>
+            </hardware>
+        </xacro:if>
+
+        <!-- REAL HARDWARE: placeholder, replace with actual driver plugin -->
+        <xacro:unless value="$(arg is_simulation)">
+            <hardware>
+                <!-- TODO: replace with your hardware plugin (ODrive, Roboclaw, etc.) -->
+                <plugin>mock_components/GenericSystem</plugin>
+            </hardware>
+        </xacro:unless>
+
+        <!-- ── Passive suspension joint (right side): state only, no command ── -->
+        <joint name="right_support_joint">
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+        </joint>
+
+        <!-- ── Steering joints (yaw): position command ── -->
+        <joint name="front_left_yaw_joint">
+            <command_interface name="position"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+        </joint>
+
+        <joint name="front_right_yaw_joint">
+            <command_interface name="position"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+        </joint>
+
+        <joint name="rear_left_yaw_joint">
+            <command_interface name="position"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+        </joint>
+
+        <joint name="rear_right_yaw_joint">
+            <command_interface name="position"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+        </joint>
+
+        <!-- ── Drive joints (wheel): velocity command ── -->
+        <joint name="front_left_wheel_joint">
+            <command_interface name="velocity"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+        </joint>
+
+        <joint name="front_right_wheel_joint">
+            <command_interface name="velocity"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+        </joint>
+
+        <joint name="rear_left_wheel_joint">
+            <command_interface name="velocity"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+        </joint>
+
+        <joint name="rear_right_wheel_joint">
+            <command_interface name="velocity"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+        </joint>
+
+    </ros2_control>
+
+</robot>

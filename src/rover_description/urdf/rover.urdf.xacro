@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<robot name="chaska_rover" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- Argument to enable simulation mode (disables real hardware) -->
+    <xacro:arg name="is_simulation" default="false"/>
+    <!-- When false, the ign_ros2_control plugin is omitted (use in unified URDF
+         where chaska_robot.urdf.xacro provides its own single plugin instance) -->
+    <xacro:arg name="with_control_plugin" default="true"/>
+
+    <!-- Base model -->
+    <xacro:include filename="$(find rover_description)/urdf/rover_base.xacro"/>
+
+    <!-- Gazebo plugins and sensors (only for simulation) -->
+    <xacro:include filename="$(find rover_description)/urdf/rover_gazebo.xacro"/>
+
+    <!-- ROS2 Control: conditional between sim and real hardware -->
+    <xacro:include filename="$(find rover_description)/urdf/rover_ros2_control.xacro"/>
+
+</robot>

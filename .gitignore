@@ -1,0 +1,35 @@
+# ── Colcon build artifacts ────────────────────────────────────────────────────
+build/
+install/
+log/
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+
+# ── ML model weights (download separately) ───────────────────────────────────
+*.pt
+*.onnx
+*.weights
+
+# ── Gazebo / Ignition cache ───────────────────────────────────────────────────
+.ignition/
+*.dae.backup
+
+# ── TF tree snapshots ────────────────────────────────────────────────────────
+frames_*.gv
+frames_*.pdf
+
+# ── Unused world/model assets ────────────────────────────────────────────────
+src/chaska_arm_description/worlds/
+src/chaska_arm_description/models/
+src/rover_description/worlds/rubicon.sdf
+
+# ── Editor / OS ──────────────────────────────────────────────────────────────
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store

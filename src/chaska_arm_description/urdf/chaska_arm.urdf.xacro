@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<robot name="chaska_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- true para simulación (Gazebo), false para visualización (RViz) -->
+  <xacro:arg name="is_simulation" default="false"/>
+
+  <!-- Links, joints e inerciales -->
+  <xacro:include filename="$(find chaska_arm_description)/urdf/chaska_arm_base.xacro"/>
+
+  <!-- Plugin Gazebo Ignition + materiales -->
+  <xacro:include filename="$(find chaska_arm_description)/urdf/chaska_arm_gazebo.xacro"/>
+
+  <!-- Interfaz ros2_control (sim=IgnitionSystem, real=mock) -->
+  <xacro:include filename="$(find chaska_arm_description)/urdf/chaska_arm_ros2_control.xacro"/>
+
+</robot>

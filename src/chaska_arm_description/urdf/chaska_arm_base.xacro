@@ -1,0 +1,321 @@
+<?xml version="1.0"?>
+<robot name="chaska_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ========== LINKS ========== -->
+
+  <link name="arm_base_link">
+    <visual>
+      <origin rpy="0 1.57079632679 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://chaska_arm_description/meshes/base.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="pearl_white">
+        <color rgba="0.94 0.94 0.96 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0.015"/>
+      <geometry>
+        <cylinder radius="0.075" length="0.030"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1.5"/>
+      <!-- Cilindro r=0.075 h=0.030: Ixx=Iyy=m(3r²+h²)/12, Izz=mr²/2 -->
+      <inertia ixx="0.002222" ixy="0" ixz="0"
+                               iyy="0.002222" iyz="0"
+                                              izz="0.004219"/>
+    </inertial>
+  </link>
+
+  <link name="link_1">
+    <visual>
+      <origin rpy="0 1.57079632679 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://chaska_arm_description/meshes/link_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="pearl_white">
+        <color rgba="0.94 0.94 0.96 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0.040"/>
+      <geometry>
+        <box size="0.125 0.125 0.083"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1.0"/>
+      <!-- Cubo s=0.080: I=ms²/6 -->
+      <inertia ixx="0.001067" ixy="0" ixz="0"
+                               iyy="0.001067" iyz="0"
+                                              izz="0.001067"/>
+    </inertial>
+  </link>
+
+  <link name="link_2">
+    <visual>
+      <origin rpy="0 1.57079632679 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://chaska_arm_description/meshes/link_2.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="pearl_white">
+        <color rgba="0.94 0.94 0.96 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0.207"/>
+      <geometry>
+        <box size="0.040 0.040 0.414"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0.200" rpy="0 0 0"/>
+      <mass value="0.5"/>
+      <!-- Caja 40×40×400 mm (eje Z): CoM a mitad de longitud -->
+      <inertia ixx="0.006733" ixy="0" ixz="0"
+                               iyy="0.006733" iyz="0"
+                                              izz="0.000133"/>
+    </inertial>
+  </link>
+
+  <link name="link_3">
+    <visual>
+      <origin rpy="0 1.57079632679 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://chaska_arm_description/meshes/link_3.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="pearl_white">
+        <color rgba="0.94 0.94 0.96 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0.254 0"/>
+      <geometry>
+        <box size="0.040 0.507 0.040"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0.2536 0" rpy="0 0 0"/>
+      <mass value="0.5"/>
+      <!-- Caja 40×507×40 mm (eje Y): CoM a mitad de longitud -->
+      <inertia ixx="0.010777" ixy="0" ixz="0"
+                               iyy="0.000133" iyz="0"
+                                              izz="0.010777"/>
+    </inertial>
+  </link>
+
+  <link name="link_4">
+    <visual>
+      <origin rpy="0 1.57079632679 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://chaska_arm_description/meshes/link_4.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="pearl_white">
+        <color rgba="0.94 0.94 0.96 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0.021 0"/>
+      <geometry>
+        <box size="0.040 0.043 0.040"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.5"/>
+      <!-- Caja 40×40×50 mm -->
+      <inertia ixx="0.000171" ixy="0" ixz="0"
+                               iyy="0.000171" iyz="0"
+                                              izz="0.000133"/>
+    </inertial>
+  </link>
+
+  <link name="link_5">
+    <visual>
+      <origin rpy="0 1.57079632679 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://chaska_arm_description/meshes/link_5.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="pearl_white">
+        <color rgba="0.94 0.94 0.96 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0.028 0"/>
+      <geometry>
+        <box size="0.040 0.055 0.040"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.5"/>
+      <!-- Caja 40×40×80 mm -->
+      <inertia ixx="0.000333" ixy="0" ixz="0"
+                               iyy="0.000333" iyz="0"
+                                              izz="0.000133"/>
+    </inertial>
+  </link>
+
+  <link name="link_6">
+    <visual>
+      <origin rpy="0 1.57079632679 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://chaska_arm_description/meshes/link_6.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="pearl_white">
+        <color rgba="0.94 0.94 0.96 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.030 0.060 0.030"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.5"/>
+      <!-- Caja 30×30×60 mm -->
+      <inertia ixx="0.000187" ixy="0" ixz="0"
+                               iyy="0.000187" iyz="0"
+                                              izz="0.000075"/>
+    </inertial>
+  </link>
+
+  <!-- ── RealSense D435 ───────────────────────────────────────────────────── -->
+
+  <link name="depth_camera">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.090 0.025 0.025"/>
+      </geometry>
+      <material name="camera_gray">
+        <color rgba="0.2 0.2 0.2 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.090 0.025 0.025"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.072"/>
+      <!-- Caja 90×25×25 mm -->
+      <inertia ixx="2.6e-5" ixy="0" ixz="0"
+                            iyy="5.0e-5" iyz="0"
+                                         izz="5.0e-5"/>
+    </inertial>
+  </link>
+
+  <!-- Marco óptico: convención ROS (Z adelante, X derecha, Y abajo) -->
+  <link name="depth_camera_optical_frame"/>
+
+  <link name="end_effector">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="0.005"/>
+      </geometry>
+      <material name="pearl_white">
+        <color rgba="0.94 0.94 0.96 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <!-- Fix: el box size="0 0 0" original crashea Gazebo -->
+        <sphere radius="0.005"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.05"/>
+      <!-- Esfera r=0.005: I=2mr²/5 -->
+      <inertia ixx="5e-7" ixy="0" ixz="0"
+                          iyy="5e-7" iyz="0"
+                                     izz="5e-7"/>
+    </inertial>
+  </link>
+
+  <!-- ========== JOINTS ========== -->
+
+  <joint name="joint_1" type="prismatic">
+    <parent link="arm_base_link"/>
+    <child link="link_1"/>
+    <origin rpy="0 0 0" xyz="0 0 0.016015"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.125" upper="0.125" effort="30.0" velocity="10.0"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <joint name="joint_2" type="revolute">
+    <parent link="link_1"/>
+    <child link="link_2"/>
+    <origin xyz="0 0 0.083" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="30.0" velocity="10.0"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <joint name="joint_3" type="revolute">
+    <parent link="link_2"/>
+    <child link="link_3"/>
+    <origin xyz="0 0 0.414" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="30.0" velocity="10.0"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <joint name="joint_4" type="revolute">
+    <parent link="link_3"/>
+    <child link="link_4"/>
+    <origin xyz="0 0.507238 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="30.0" velocity="10.0"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <joint name="joint_5" type="revolute">
+    <parent link="link_4"/>
+    <child link="link_5"/>
+    <origin xyz="0 0.0428 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="30.0" velocity="10.0"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <joint name="joint_6" type="prismatic">
+    <parent link="link_5"/>
+    <child link="link_6"/>
+    <origin xyz="0 0.055 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.065" upper="0.02" effort="30.0" velocity="10.0"/>
+    <dynamics damping="0.1" friction="0.1"/>
+  </joint>
+
+  <joint name="joint_7" type="fixed">
+    <parent link="link_5"/>
+    <child link="end_effector"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+
+  <joint name="depth_camera_joint" type="fixed">
+    <parent link="link_5"/>
+    <child link="depth_camera"/>
+    <origin xyz="0 0.035 0.02" rpy="0 0 1.5708"/>
+  </joint>
+
+  <joint name="depth_camera_optical_joint" type="fixed">
+    <parent link="depth_camera"/>
+    <child link="depth_camera_optical_frame"/>
+    <!-- Convención óptica ROS: rotar -90° en X y -90° en Z -->
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+</robot>

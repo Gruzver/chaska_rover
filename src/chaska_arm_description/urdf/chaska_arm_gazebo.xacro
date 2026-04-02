@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<robot name="chaska_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ========== MATERIALES GAZEBO ========== -->
+  <!-- Gazebo ignora los <material> del URDF; estos tags sobreescriben la apariencia -->
+
+  <gazebo reference="arm_base_link">
+    <material>Gazebo/White</material>
+  </gazebo>
+
+  <gazebo reference="link_1">
+    <material>Gazebo/White</material>
+  </gazebo>
+
+  <gazebo reference="link_2">
+    <material>Gazebo/White</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+
+  <gazebo reference="link_3">
+    <material>Gazebo/White</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+
+  <gazebo reference="link_4">
+    <material>Gazebo/White</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+
+  <gazebo reference="link_5">
+    <material>Gazebo/White</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+
+  <gazebo reference="link_6">
+    <material>Gazebo/White</material>
+    <mu1>0.2</mu1>
+    <mu2>0.2</mu2>
+  </gazebo>
+
+  <gazebo reference="end_effector">
+    <material>Gazebo/White</material>
+  </gazebo>
+
+  <!-- ========== REALSENSE D435 ========== -->
+
+  <gazebo reference="depth_camera">
+    <sensor name="depth_camera" type="rgbd_camera">
+      <always_on>true</always_on>
+      <update_rate>15</update_rate>
+      <topic>depth_camera</topic>
+      <gz_frame_id>depth_camera_optical_frame</gz_frame_id>
+      <camera>
+        <!-- D435: HFov 87°, VFov 58° -->
+        <horizontal_fov>1.5184</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+        </image>
+        <clip>
+          <near>0.3</near>
+          <far>10.0</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
+
+  <!-- El plugin ign_ros2_control se define en el URDF unificado (chaska_robot.urdf.xacro).
+       No se declara aquí para evitar tener dos controller_manager en la misma simulación. -->
+
+</robot>
