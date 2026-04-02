@@ -60,10 +60,9 @@ BTN_SQUARE   = 2
 BTN_TRIANGLE = 3
 BTN_L1       = 4
 BTN_R1       = 5
-BTN_DPAD_UP    = 13
-BTN_DPAD_DOWN  = 14
-BTN_DPAD_LEFT  = 15
-BTN_DPAD_RIGHT = 16
+# D-pad reportado como ejes en este driver (no como botones)
+AXIS_DPAD_X = 6   # izq=-1, der=+1  → muñeca roll  (joint_5)
+AXIS_DPAD_Y = 7   # abj=-1, arr=+1  → muñeca pitch (joint_4)
 
 # ── Ejes ─────────────────────────────────────────────────────────────────────
 AXIS_LEFT_X  = 0
@@ -163,8 +162,8 @@ class JoyModeSwitcher(Node):
             #   D-pad ←/→    → joint_5 roll  (gira muñeca)
             #   R1            → joint_6 abre  (gripper +)
             #   L1            → joint_6 cierra (gripper −)
-            j4_vel = (btn(BTN_DPAD_UP)    - btn(BTN_DPAD_DOWN))  * WRIST_SPEED
-            j5_vel = (btn(BTN_DPAD_RIGHT) - btn(BTN_DPAD_LEFT))  * WRIST_SPEED
+            j4_vel = ax(AXIS_DPAD_Y) * WRIST_SPEED   # ↑↓ pitch
+            j5_vel = ax(AXIS_DPAD_X) * WRIST_SPEED   # ←→ roll
             j6_vel = (btn(BTN_R1)         - btn(BTN_L1))         * GRIPPER_SPEED
 
             wrist = JointState()
