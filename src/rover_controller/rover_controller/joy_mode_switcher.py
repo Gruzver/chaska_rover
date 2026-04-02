@@ -60,6 +60,10 @@ BTN_SQUARE   = 2
 BTN_TRIANGLE = 3
 BTN_L1       = 4
 BTN_R1       = 5
+BTN_DPAD_UP    = 13
+BTN_DPAD_DOWN  = 14
+BTN_DPAD_LEFT  = 15
+BTN_DPAD_RIGHT = 16
 
 # ── Ejes ─────────────────────────────────────────────────────────────────────
 AXIS_LEFT_X  = 0
@@ -105,8 +109,9 @@ class JoyModeSwitcher(Node):
         self.get_logger().info(
             'Joy mode switcher listo\n'
             '  Rover : L1+sticks=mover  △=swerve  □=diff  ○=ackermann  ✕=modo brazo\n'
-            '  Brazo : L-stick X/Y=EE x/y  R-stick Y=altura  R-stick X=muñeca pitch\n'
-            '          R2/L2=muñeca roll  R1=gripper abre  L1=gripper cierra  ✕=rover'
+            '  Brazo : L-stick X/Y=EE lat/fwd  R-stick Y=altura\n'
+            '          D-pad ↑↓=muñeca pitch  D-pad ←→=muñeca roll\n'
+            '          R1=gripper abre  L1=gripper cierra  ✕=rover'
         )
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -144,28 +149,23 @@ class JoyModeSwitcher(Node):
             self._cmd_vel_pub.publish(Twist())
 
             # EE position IK (joints 1-3):
-            #   Left  stick X  → lateral (EE.x)
+            #   Left  stick X  → lateral   (EE.x, negado: der=+)
             #   Left  stick Y  → adelante/atrás (EE.y)
-            #   Right stick Y  → altura (EE.z, invertido: arriba = positivo)
+            #   Right stick Y  → altura    (EE.z, negado: arriba=+)
             ee = Vector3()
-            ee.x =  ax(AXIS_LEFT_X)   * EE_SPEED
-            ee.y =  ax(AXIS_LEFT_Y)   * EE_SPEED
-            ee.z = -ax(AXIS_RIGHT_Y)  * EE_SPEED   # -1 porque arriba=negativo en evdev
+            ee.x = -ax(AXIS_LEFT_X)  * EE_SPEED
+            ee.y =  ax(AXIS_LEFT_Y)  * EE_SPEED
+            ee.z =  ax(AXIS_RIGHT_Y) * EE_SPEED
             self._ee_pub.publish(ee)
 
             # Muñeca + gripper (control directo):
-            #   Right stick X → joint_4 (pitch)
-            #   R2 analógico  → joint_5 positivo (roll horario)
-            #   L2 analógico  → joint_5 negativo (roll antihorario)
-            #   R1            → joint_6 abre (gripper +)
+            #   D-pad ↑/↓    → joint_4 pitch (asiente/levanta muñeca)
+            #   D-pad ←/→    → joint_5 roll  (gira muñeca)
+            #   R1            → joint_6 abre  (gripper +)
             #   L1            → joint_6 cierra (gripper −)
-            def analog(axis_idx):
-                """Normaliza trigger analógico [-1,+1] → [0,1]."""
-                return max(0.0, (ax(axis_idx) + 1.0) / 2.0)
-
-            j4_vel = ax(AXIS_RIGHT_X) * WRIST_SPEED
-            j5_vel = (analog(AXIS_R2) - analog(AXIS_L2)) * WRIST_SPEED
-            j6_vel = (btn(BTN_R1) - btn(BTN_L1)) * GRIPPER_SPEED
+            j4_vel = (btn(BTN_DPAD_UP)    - btn(BTN_DPAD_DOWN))  * WRIST_SPEED
+            j5_vel = (btn(BTN_DPAD_RIGHT) - btn(BTN_DPAD_LEFT))  * WRIST_SPEED
+            j6_vel = (btn(BTN_R1)         - btn(BTN_L1))         * GRIPPER_SPEED
 
             wrist = JointState()
             wrist.name     = ['joint_4', 'joint_5', 'joint_6']
