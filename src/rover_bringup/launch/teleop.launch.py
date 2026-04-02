@@ -1,33 +1,30 @@
 """
-Teleoperation launch file — run alongside rover_simulation.launch.py.
+Teleoperation launch — usar junto con rover_simulation.launch.py (solo rover)
+o rover_bringup.launch.py (hardware real).
 
-Usage:
-  ros2 launch rover_bringup teleop.launch.py
+NO usar junto con chaska_simulation.launch.py — ese launch ya incluye
+joy_node + joy_mode_switcher internamente.
 
-Controls (PS5 DualSense):
-  Hold L1            → enable movement
-  Hold L1 + R1       → turbo (2x speed)
-  Left stick Y       → forward / backward
-  Left stick X       → strafe left / right  (swerve mode only)
-  Right stick X      → rotate left / right
+joy_mode_switcher publica /cmd_vel directamente (no se necesita teleop_twist_joy).
 
-  Triangle (△)       → switch to swerve mode
-  Square   (□)       → switch to differential mode
-  Circle   (○)       → switch to ackermann mode
+Controles PS5 DualSense:
+  Mantener L1       → habilita movimiento
+  L1 + R1           → turbo (2× velocidad)
+  Stick izq. Y      → adelante / atrás
+  Stick izq. X      → strafe (solo modo swerve)
+  Stick der. X      → rotar
+  △ Triángulo       → modo swerve
+  □ Cuadrado        → modo differential
+  ○ Círculo         → modo ackermann
+  ✕ Cruz            → modo brazo (arm_controller en hardware real)
 """
 
 import os
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
-
-    teleop_config = os.path.join(
-        get_package_share_directory('rover_bringup'),
-        'config', 'ps5_teleop.yaml'
-    )
 
     joy_node = Node(
         package='joy',
@@ -35,14 +32,6 @@ def generate_launch_description():
         name='joy_node',
         output='screen',
         parameters=[{'device_id': 0}],
-    )
-
-    teleop_node = Node(
-        package='teleop_twist_joy',
-        executable='teleop_node',
-        name='teleop_twist_joy_node',
-        output='screen',
-        parameters=[teleop_config],
     )
 
     mode_switcher_node = Node(
@@ -54,6 +43,5 @@ def generate_launch_description():
 
     return LaunchDescription([
         joy_node,
-        teleop_node,
         mode_switcher_node,
     ])
