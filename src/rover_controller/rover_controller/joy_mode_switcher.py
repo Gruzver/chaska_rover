@@ -170,7 +170,7 @@ class JoyModeSwitcher(Node):
                 scale_ang = ANGULAR_TURBO  if turbo else ANGULAR_NORMAL
 
                 twist = Twist()
-                twist.linear.x  = -ax(AXIS_LEFT_Y)  * scale_lin   # invertir eje Y
+                twist.linear.x  =  ax(AXIS_LEFT_Y)  * scale_lin
                 twist.linear.y  =  ax(AXIS_LEFT_X)  * scale_lin
                 twist.angular.z =  ax(AXIS_RIGHT_X) * scale_ang
                 self._cmd_vel_pub.publish(twist)

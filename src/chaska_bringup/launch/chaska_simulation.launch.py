@@ -31,9 +31,9 @@ def generate_launch_description():
         'world_name', default_value='empty',
         description='World to load (sin extensión): empty, rubicon, ...'
     )
-    spawn_x_arg = DeclareLaunchArgument('spawn_x', default_value='7.0')
-    spawn_y_arg = DeclareLaunchArgument('spawn_y', default_value='7.0')
-    spawn_z_arg = DeclareLaunchArgument('spawn_z', default_value='0.5')
+    spawn_x_arg = DeclareLaunchArgument('spawn_x', default_value='10.0')
+    spawn_y_arg = DeclareLaunchArgument('spawn_y', default_value='10.0')
+    spawn_z_arg = DeclareLaunchArgument('spawn_z', default_value='3')
 
     # ── Paths ─────────────────────────────────────────────────────────────────
     world_path = PathJoinSubstitution([
@@ -153,6 +153,18 @@ def generate_launch_description():
         output='screen',
     )
 
+    arm_velocity_node = Node(
+        package='chaska_arm_controller',
+        executable='joint_velocity_node',
+        parameters=[{
+            'use_sim_time':   True,
+            'control_rate':   50.0,
+            'damping':        1e-3,
+            'velocity_scale': 1.0,
+        }],
+        output='screen',
+    )
+
     joy_node = Node(
         package='joy',
         executable='joy_node',
@@ -177,19 +189,13 @@ def generate_launch_description():
         output='screen',
     )
 
-    # ── Secuencia de arranque ─────────────────────────────────────────────────
-    # t=0s  : Gazebo + RSP + bridge
-    # t=3s  : spawn robot
-    # t=8s  : controladores + nodos aplicación (ign_ros2_control tarda ~5s)
-    # t=9s  : RViz
-
     # ── Secuencia de arranque ─────────────────────────────────────────────
-    # t=0s  : Gazebo + RSP + bridge
+    # t=0s  : Gazebo + RSP + bridge + joy_node
     # t=3s  : spawn robot
     # t=8s  : joint_state_broadcaster
     # t=9s  : yaw + wheel (rover)
     # t=10s : arm + gripper
-    # t=11s : swerve_node + joy_mode_switcher
+    # t=11s : swerve_node + joy_mode_switcher + arm_velocity_node (IK→JointTrajectory)
     # t=12s : RViz
 
     return LaunchDescription([
@@ -206,6 +212,6 @@ def generate_launch_description():
         TimerAction(period=8.0,  actions=[joint_state_broadcaster_spawner]),
         TimerAction(period=9.0,  actions=[yaw_spawner, wheel_spawner]),
         TimerAction(period=10.0, actions=[arm_spawner, gripper_spawner]),
-        TimerAction(period=11.0, actions=[swerve_node, joy_mode_switcher]),
+        TimerAction(period=11.0, actions=[swerve_node, joy_mode_switcher, arm_velocity_node]),
         TimerAction(period=12.0, actions=[rviz]),
     ])
