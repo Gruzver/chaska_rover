@@ -63,9 +63,11 @@ BTN_R1       = 5
 
 # ── Ejes ─────────────────────────────────────────────────────────────────────
 AXIS_LEFT_X  = 0
-AXIS_LEFT_Y  = 1   # invertido: arriba = -1 → negar para avanzar
-AXIS_RIGHT_X = 3   # stick derecho X (eje 2 es L2 analógico, no stick)
-AXIS_R2      = 5   # R2 analógico: -1=suelto → normalizar a 0..1
+AXIS_LEFT_Y  = 1   # invertido en algunos drivers
+AXIS_L2      = 2   # L2 analógico: -1=suelto, +1=presionado
+AXIS_RIGHT_X = 3
+AXIS_RIGHT_Y = 4
+AXIS_R2      = 5   # R2 analógico: -1=suelto, +1=presionado
 
 # ── Velocidades rover ─────────────────────────────────────────────────────────
 LINEAR_NORMAL  = 0.5    # m/s
@@ -73,9 +75,10 @@ LINEAR_TURBO   = 1.0
 ANGULAR_NORMAL = 1.0    # rad/s
 ANGULAR_TURBO  = 2.0
 
-# ── Velocidad brazo ───────────────────────────────────────────────────────────
-EE_SPEED    = 0.05   # m/s máximo efector
-WRIST_SPEED = 0.5    # rad/s muñeca
+# ── Velocidades brazo ─────────────────────────────────────────────────────────
+EE_SPEED      = 0.15   # m/s  EE position (joints 1-3 IK)
+WRIST_SPEED   = 0.8    # rad/s joint_4 y joint_5
+GRIPPER_SPEED = 0.04   # m/s  joint_6 (rango total −0.065..0.02 m)
 
 ROVER_BUTTON_MODE_MAP = {
     BTN_TRIANGLE: 'swerve',
@@ -101,8 +104,9 @@ class JoyModeSwitcher(Node):
 
         self.get_logger().info(
             'Joy mode switcher listo\n'
-            '  Rover: L1+sticks=mover  △=swerve  □=diff  ○=ackermann  ✕=modo brazo\n'
-            '  Brazo: stick-izq=EE XZ  stick-der=EE Y  R2=muñeca  ✕=volver rover'
+            '  Rover : L1+sticks=mover  △=swerve  □=diff  ○=ackermann  ✕=modo brazo\n'
+            '  Brazo : L-stick X/Y=EE x/y  R-stick Y=altura  R-stick X=muñeca pitch\n'
+            '          R2/L2=muñeca roll  R1=gripper abre  L1=gripper cierra  ✕=rover'
         )
 
     # ─────────────────────────────────────────────────────────────────────────
@@ -139,19 +143,34 @@ class JoyModeSwitcher(Node):
             # Detener rover explícitamente en cada ciclo
             self._cmd_vel_pub.publish(Twist())
 
+            # EE position IK (joints 1-3):
+            #   Left  stick X  → lateral (EE.x)
+            #   Left  stick Y  → adelante/atrás (EE.y)
+            #   Right stick Y  → altura (EE.z, invertido: arriba = positivo)
             ee = Vector3()
-            ee.x =  ax(AXIS_LEFT_X)  * EE_SPEED   # lateral
-            ee.z = -ax(AXIS_LEFT_Y)  * EE_SPEED   # arriba/abajo (eje Y invertido)
-            ee.y =  ax(AXIS_RIGHT_X) * EE_SPEED   # adelante/atrás
+            ee.x =  ax(AXIS_LEFT_X)   * EE_SPEED
+            ee.y =  ax(AXIS_LEFT_Y)   * EE_SPEED
+            ee.z = -ax(AXIS_RIGHT_Y)  * EE_SPEED   # -1 porque arriba=negativo en evdev
             self._ee_pub.publish(ee)
 
-            # R2: normalizar de [-1, +1] → [0, 1]
-            r2 = (ax(AXIS_R2) + 1.0) / 2.0
-            if r2 > 0.05:
-                wrist = JointState()
-                wrist.name     = ['joint_5']
-                wrist.velocity = [r2 * WRIST_SPEED]
-                self._wrist_pub.publish(wrist)
+            # Muñeca + gripper (control directo):
+            #   Right stick X → joint_4 (pitch)
+            #   R2 analógico  → joint_5 positivo (roll horario)
+            #   L2 analógico  → joint_5 negativo (roll antihorario)
+            #   R1            → joint_6 abre (gripper +)
+            #   L1            → joint_6 cierra (gripper −)
+            def analog(axis_idx):
+                """Normaliza trigger analógico [-1,+1] → [0,1]."""
+                return max(0.0, (ax(axis_idx) + 1.0) / 2.0)
+
+            j4_vel = ax(AXIS_RIGHT_X) * WRIST_SPEED
+            j5_vel = (analog(AXIS_R2) - analog(AXIS_L2)) * WRIST_SPEED
+            j6_vel = (btn(BTN_R1) - btn(BTN_L1)) * GRIPPER_SPEED
+
+            wrist = JointState()
+            wrist.name     = ['joint_4', 'joint_5', 'joint_6']
+            wrist.velocity = [j4_vel, j5_vel, j6_vel]
+            self._wrist_pub.publish(wrist)
 
         # ── Modo rover ────────────────────────────────────────────────────────
         else:

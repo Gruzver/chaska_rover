@@ -43,7 +43,11 @@ ARM_CTRL_JOINTS = JOINT_NAMES[:5]   # los que arm_controller acepta
 
 IDX_JOINT_4 = 3
 IDX_JOINT_5 = 4
+IDX_JOINT_6 = 5
 
+# Joints 1-3: controlados por IK de posición EE
+# Joints 4-5: velocidad directa (muñeca)
+# Joint  6  : velocidad directa (gripper)
 Q_MIN = np.array([-0.125, -1.5708, -1.5708, -1.5708, -1.5708, -0.065])
 Q_MAX = np.array([ 0.125,  1.5708,  1.5708,  1.5708,  1.5708,  0.020])
 
@@ -85,8 +89,8 @@ class JointVelocityNode(Node):
         self.q_ready      = False   # esperar primer /joint_states antes de actuar
 
         # ── Comandos recibidos ────────────────────────────────────────────────
-        self.v_ee_target   = np.zeros(3)
-        self.dq_wrist      = np.zeros(2)
+        self.v_ee_target   = np.zeros(3)    # IK joints 1-3
+        self.dq_wrist      = np.zeros(3)    # directo: joint_4, joint_5, joint_6
         self.ee_cmd_active = False
         self.estop         = False
 
@@ -106,10 +110,12 @@ class JointVelocityNode(Node):
         self.create_subscription(JointState, '/joint_states',          self._joint_states_cb, qos_be)
 
         # ── Publicadores ──────────────────────────────────────────────────────
-        self._traj_pub  = self.create_publisher(
-            JointTrajectory, '/arm_controller/joint_trajectory', qos)
-        self._ee_vel_pub = self.create_publisher(Vector3, '/ee_velocity_actual', qos)
-        self._ee_pos_pub = self.create_publisher(Vector3, '/ee_position',        qos)
+        self._traj_pub     = self.create_publisher(
+            JointTrajectory, '/arm_controller/joint_trajectory',     qos)
+        self._gripper_pub  = self.create_publisher(
+            JointTrajectory, '/gripper_controller/joint_trajectory', qos)
+        self._ee_vel_pub   = self.create_publisher(Vector3, '/ee_velocity_actual', qos)
+        self._ee_pos_pub   = self.create_publisher(Vector3, '/ee_position',        qos)
 
         self.create_timer(self.dt, self._control_loop)
 
@@ -141,6 +147,7 @@ class JointVelocityNode(Node):
         name_to_vel = dict(zip(msg.name, msg.velocity))
         self.dq_wrist[0] = name_to_vel.get('joint_4', 0.0)
         self.dq_wrist[1] = name_to_vel.get('joint_5', 0.0)
+        self.dq_wrist[2] = name_to_vel.get('joint_6', 0.0)
 
     def _estop_cb(self, msg: Bool):
         if msg.data and not self.estop:
@@ -159,49 +166,57 @@ class JointVelocityNode(Node):
             self._send_trajectory(self.q_cmd)   # mantener última posición comandada
             return
 
-        # IK de velocidad — usa posición REAL para Jacobiano preciso
         dq = np.zeros(self.kin.nv)
+
+        # ── IK posición EE → solo joints 1-3 (Jacobiano reducido) ───────────
+        # Joints 4-5 se controlan directo; excluirlos del IK evita conflictos.
         if self.ee_cmd_active:
             try:
-                dq = self.kin.joint_velocities_from_ee_velocity(
-                    q=self.q, v_ee=self.v_ee_target,
-                    damping=self.damping, scale=self.velocity_scale,
-                )
+                J_full = self.kin.compute_jacobian(self.q)   # (3, 6)
+                J_red  = J_full[:, :3]                        # solo joints 1-3
+                lam    = self.damping ** 2
+                J_dls  = J_red.T @ np.linalg.inv(J_red @ J_red.T + lam * np.eye(3))
+                dq[:3] = J_dls @ self.v_ee_target * self.velocity_scale
             except Exception as e:
                 self.get_logger().error(f'IK error: {e}')
 
-        # Control directo de muñeca (joint_4, joint_5)
+        # ── Control directo: muñeca (joint_4, joint_5) y gripper (joint_6) ──
         dq[IDX_JOINT_4] = self.dq_wrist[0]
         dq[IDX_JOINT_5] = self.dq_wrist[1]
+        dq[IDX_JOINT_6] = self.dq_wrist[2]
 
         self.dq = dq
 
-        # Integrar q_cmd: acumulador independiente de la posición real.
-        # El JTC recibe siempre la posición TARGET acumulada, no un micro-delta.
-        # Cuando dq=0 (sin comando), q_cmd no cambia → el brazo mantiene posición.
+        # Acumular q_cmd solo cuando hay algún comando activo
         has_command = self.ee_cmd_active or np.any(np.abs(self.dq_wrist) > 1e-6)
         if has_command:
             self.q_cmd = np.clip(self.q_cmd + dq * self.dt, Q_MIN, Q_MAX)
 
+        # Enviar joints 1-5 al arm_controller y joint_6 al gripper_controller
         self._send_trajectory(self.q_cmd)
         self._publish_telemetry()
 
     def _send_trajectory(self, q_target: np.ndarray):
-        """Envía un JointTrajectoryPoint al arm_controller (joint_1..joint_5).
+        """Envía trayectorias a arm_controller (joints 1-5) y gripper_controller (joint_6)."""
+        lookahead = Duration(sec=0, nanosec=100_000_000)  # 0.1 s
 
-        header.stamp = 0  →  time_from_start relativo a cuando llega el mensaje.
-        Lookahead 0.1 s: suficiente para latencia de red/sim sin sentirse lento.
-        joint_6 (gripper) lo gestiona gripper_controller; no se incluye aquí.
-        """
-        traj = JointTrajectory()
-        traj.joint_names = ARM_CTRL_JOINTS   # solo los 5 primeros
+        # arm_controller: joint_1..joint_5
+        arm_traj = JointTrajectory()
+        arm_traj.joint_names = ARM_CTRL_JOINTS
+        arm_pt = JointTrajectoryPoint()
+        arm_pt.positions       = q_target[:len(ARM_CTRL_JOINTS)].tolist()
+        arm_pt.time_from_start = lookahead
+        arm_traj.points = [arm_pt]
+        self._traj_pub.publish(arm_traj)
 
-        pt = JointTrajectoryPoint()
-        pt.positions       = q_target[:len(ARM_CTRL_JOINTS)].tolist()
-        pt.time_from_start = Duration(sec=0, nanosec=100_000_000)  # 0.1 s
-
-        traj.points = [pt]
-        self._traj_pub.publish(traj)
+        # gripper_controller: joint_6
+        grip_traj = JointTrajectory()
+        grip_traj.joint_names = ['joint_6']
+        grip_pt = JointTrajectoryPoint()
+        grip_pt.positions       = [float(q_target[IDX_JOINT_6])]
+        grip_pt.time_from_start = lookahead
+        grip_traj.points = [grip_pt]
+        self._gripper_pub.publish(grip_traj)
 
     def _publish_telemetry(self):
         try:
