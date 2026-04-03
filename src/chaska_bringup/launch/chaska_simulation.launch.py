@@ -31,9 +31,9 @@ def generate_launch_description():
         'world_name', default_value='empty',
         description='World to load (sin extensión): empty, rubicon, ...'
     )
-    spawn_x_arg = DeclareLaunchArgument('spawn_x', default_value='10.0')
-    spawn_y_arg = DeclareLaunchArgument('spawn_y', default_value='10.0')
-    spawn_z_arg = DeclareLaunchArgument('spawn_z', default_value='3')
+    spawn_x_arg = DeclareLaunchArgument('spawn_x', default_value='9.0')
+    spawn_y_arg = DeclareLaunchArgument('spawn_y', default_value='9.0')
+    spawn_z_arg = DeclareLaunchArgument('spawn_z', default_value='1.9')
 
     # ── Paths ─────────────────────────────────────────────────────────────────
     world_path = PathJoinSubstitution([

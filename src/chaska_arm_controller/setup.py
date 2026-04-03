@@ -28,12 +28,6 @@ setup(
     entry_points={
         'console_scripts': [
             'joint_velocity_node = chaska_arm_controller.joint_velocity_node:main',
-            'joystick_controller = chaska_arm_controller.joystick_controller_node:main',
-            'move_rmd_motor = chaska_arm_controller.move_rmd_motor:main',
-            'move_nemas = chaska_arm_controller.move_nemas:main',
-            'joystick_teleoperado = chaska_arm_controller.joystick_teleoperado:main',
-            'move_effector_esp32 = chaska_arm_controller.move_effector_esp32:main',
-            'control_total = chaska_arm_controller.control_total:main',
         ],
     },
 )

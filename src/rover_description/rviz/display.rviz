@@ -5,8 +5,9 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /Image1
       Splitter Ratio: 0.5
-    Tree Height: 521
+    Tree Height: 580
   - Class: rviz_common/Views
     Expanded:
       - /Current View1
@@ -51,6 +52,11 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        arm_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         base_footprint:
           Alpha: 1
           Show Axes: false
@@ -69,6 +75,20 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
+        depth_camera:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        depth_camera_optical_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        end_effector:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         front_left_wheel:
           Alpha: 1
           Show Axes: false
@@ -100,6 +120,36 @@ Visualization Manager:
           Show Trail: false
           Value: true
         left_support_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        link_1:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        link_2:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        link_3:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        link_4:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        link_5:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        link_6:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -142,6 +192,8 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
+        arm_base_link:
+          Value: true
         base_footprint:
           Value: true
         base_link:
@@ -149,6 +201,12 @@ Visualization Manager:
         camera:
           Value: true
         camera_optical_frame:
+          Value: true
+        depth_camera:
+          Value: true
+        depth_camera_optical_frame:
+          Value: true
+        end_effector:
           Value: true
         front_left_wheel:
           Value: true
@@ -163,6 +221,18 @@ Visualization Manager:
         laser:
           Value: true
         left_support_link:
+          Value: true
+        link_1:
+          Value: true
+        link_2:
+          Value: true
+        link_3:
+          Value: true
+        link_4:
+          Value: true
+        link_5:
+          Value: true
+        link_6:
           Value: true
         rear_left_wheel:
           Value: true
@@ -182,6 +252,19 @@ Visualization Manager:
       Tree:
         base_footprint:
           base_link:
+            arm_base_link:
+              link_1:
+                link_2:
+                  link_3:
+                    link_4:
+                      link_5:
+                        depth_camera:
+                          depth_camera_optical_frame:
+                            {}
+                        end_effector:
+                          {}
+                        link_6:
+                          {}
             camera:
               camera_optical_frame:
                 {}
@@ -208,8 +291,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 9.735286712646484
-        Min Value: -0.7423954010009766
+        Max Value: 8.490730285644531
+        Min Value: -0.47806715965270996
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -287,6 +370,20 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Class: rviz_default_plugins/Image
+      Enabled: true
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Image
+      Normalize Range: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /depth_camera/image
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -325,37 +422,39 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 7.940013408660889
+      Distance: 6.143787384033203
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: 0.5078465938568115
+        Y: -0.2845667898654938
+        Z: 1.2630891799926758
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.39000025391578674
+      Pitch: 0.3050002455711365
       Target Frame: base_footprint
       Value: Orbit (rviz_default_plugins)
-      Yaw: 1.3500016927719116
+      Yaw: 3.0250048637390137
     Saved: ~
 Window Geometry:
   Camara RGB:
     collapsed: false
   Displays:
     collapsed: false
-  Height: 1043
+  Height: 1529
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000002d5000003abfc0200000003fb000000100044006900730070006c0061007900730100000047000002a5000000f100fffffffb0000000a005600690065007700730000000261000000c2000000c200fffffffb0000001400430061006d006100720061002000520047004201000002f3000000ff0000002f00ffffff000003c9000003ab00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Image:
+    collapsed: false
+  QMainWindow State: 000000ff00000000fd0000000100000000000002d500000591fc0200000004fb000000100044006900730070006c0061007900730100000047000002e0000000f100fffffffb0000000a005600690065007700730000000261000000c2000000c200fffffffb0000001400430061006d0061007200610020005200470042010000032e000001450000002f00fffffffb0000000a0049006d006100670065010000047a0000015e0000002f00ffffff000007240000059100000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
-  Width: 1701
-  X: 1715
-  Y: 232
+  Width: 2560
+  X: 1080
+  Y: 34

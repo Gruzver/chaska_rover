@@ -145,8 +145,8 @@
                 <geometry>
                     <mesh filename="package://rover_description/meshes/yaw.stl" scale="0.001 0.001 0.001"/>
                 </geometry>
-                <material name="black">
-                    <color rgba="0.1 0.1 0.1 1.0"/>
+                <material name="other_black">
+                    <color rgba="0.05 0.05 0.05 1.0"/>
                 </material>
             </visual>
             <collision>
@@ -184,8 +184,8 @@
                 <geometry>
                     <mesh filename="package://rover_description/meshes/wheel.stl" scale="0.001 0.001 0.001"/>
                 </geometry>
-                <material name="black">
-                    <color rgba="0.1 0.1 0.1 1.0"/>
+                <material name="white">
+                    <color rgba="0.95 0.95 0.95 1.0"/>
                 </material>
             </visual>
             <collision>
@@ -218,8 +218,8 @@
             <geometry>
                 <mesh filename="package://rover_description/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
             </geometry>
-            <material name="orange">
-                <color rgba="0.9 0.5 0.1 1.0"/>
+            <material name="other_black">
+                <color rgba="0.05 0.05 0.05 1.0"/>
             </material>
         </visual>
         <collision>

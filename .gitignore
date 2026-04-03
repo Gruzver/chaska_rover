@@ -27,6 +27,9 @@ src/chaska_arm_description/worlds/
 src/chaska_arm_description/models/
 src/rover_description/worlds/rubicon.sdf
 
+# ── Claude context (local only) ──────────────────────────────────────────────
+workspace_status.md
+
 # ── Editor / OS ──────────────────────────────────────────────────────────────
 .vscode/
 *.swp

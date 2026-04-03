@@ -9,8 +9,8 @@
       <geometry>
         <mesh filename="package://chaska_arm_description/meshes/base.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-      <material name="pearl_white">
-        <color rgba="0.94 0.94 0.96 1.0"/>
+      <material name="pearl">
+        <color rgba="0.4 0.4 0.4 1.0"/>
       </material>
     </visual>
     <collision>
@@ -35,8 +35,8 @@
       <geometry>
         <mesh filename="package://chaska_arm_description/meshes/link_1.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-      <material name="pearl_white">
-        <color rgba="0.94 0.94 0.96 1.0"/>
+      <material name="other_black">
+        <color rgba="0.05 0.05 0.05 1.0"/>
       </material>
     </visual>
     <collision>
@@ -113,8 +113,8 @@
       <geometry>
         <mesh filename="package://chaska_arm_description/meshes/link_4.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-      <material name="pearl_white">
-        <color rgba="0.94 0.94 0.96 1.0"/>
+      <material name="other_black">
+        <color rgba="0.05 0.05 0.05 1.0"/>
       </material>
     </visual>
     <collision>
@@ -139,14 +139,14 @@
       <geometry>
         <mesh filename="package://chaska_arm_description/meshes/link_5.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-      <material name="pearl_white">
-        <color rgba="0.94 0.94 0.96 1.0"/>
+      <material name="other_black">
+        <color rgba="0.05 0.05 0.05 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0.028 0"/>
+      <origin rpy="0 1.57079632679 0" xyz="0 0 0"/>
       <geometry>
-        <box size="0.040 0.055 0.040"/>
+        <mesh filename="package://chaska_arm_description/meshes/link_5.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
     <inertial>
@@ -165,14 +165,14 @@
       <geometry>
         <mesh filename="package://chaska_arm_description/meshes/link_6.stl" scale="0.001 0.001 0.001"/>
       </geometry>
-      <material name="pearl_white">
-        <color rgba="0.94 0.94 0.96 1.0"/>
+      <material name="other_black">
+        <color rgba="0.05 0.05 0.05 1.0"/>
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <origin rpy="0 1.57079632679 0" xyz="0 0 0"/>
       <geometry>
-        <box size="0.030 0.060 0.030"/>
+        <mesh filename="package://chaska_arm_description/meshes/link_6.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
     <inertial>
@@ -308,7 +308,7 @@
   <joint name="depth_camera_joint" type="fixed">
     <parent link="link_5"/>
     <child link="depth_camera"/>
-    <origin xyz="0 0.035 0.02" rpy="0 0 1.5708"/>
+    <origin xyz="0 -0.08 0.4" rpy="0 0.6 1.5708"/>
   </joint>
 
   <joint name="depth_camera_optical_joint" type="fixed">

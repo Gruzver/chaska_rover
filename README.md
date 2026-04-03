@@ -1,33 +1,18 @@
 # Chaska Rover
 
-A 4-wheel swerve-drive rover with a 6-DOF robotic arm, simulated in Gazebo Ignition Fortress under ROS 2 Humble. The system supports autonomous navigation hardware and teleoperation via a PS5 DualSense controller, with switchable drive modes and arm control.
+[![ROS 2 Humble](https://img.shields.io/badge/ROS_2-Humble-blue?logo=ros)](https://docs.ros.org/en/humble/)
+[![Gazebo Ignition Fortress](https://img.shields.io/badge/Gazebo-Ignition_Fortress-orange)](https://gazebosim.org/)
+[![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python)](https://www.python.org/)
+[![Pinocchio](https://img.shields.io/badge/Pinocchio-IK-green)](https://github.com/stack-of-tasks/pinocchio)
+[![YOLOv8](https://img.shields.io/badge/YOLOv8-Detection-purple)](https://github.com/ultralytics/ultralytics)
+[![URC](https://img.shields.io/badge/Competition-URC-red)](https://urc.marssociety.org/)
+[![ERC](https://img.shields.io/badge/Competition-ERC-blue)](https://roverchallenge.eu/)
 
----
+A full-stack ROS 2 platform for rover competitions, combining a **4-wheel swerve-drive chassis** with a **6-DOF robotic arm** and a sensor suite including 3D LiDAR, depth cameras, and IMU. The system features three switchable drive modes (swerve, differential, Ackermann), velocity-based arm IK via Pinocchio, and full teleoperation through a PS5 DualSense controller. Designed for the **University Rover Challenge (URC)** and **European Rover Challenge (ERC)**.
 
-## System Overview
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                     chaska_robot                        │
-│                                                         │
-│   base_footprint                                        │
-│       └── base_link (chassis)                           │
-│             ├── [FL/FR/RL/RR] yaw → wheel (×4)         │
-│             ├── laser  (Livox 3D LiDAR, 16ch)           │
-│             ├── camera (RGBD)                           │
-│             ├── imu                                     │
-│             └── arm_base_link (fixed mount)             │
-│                   └── link_1 → link_2 → link_3          │
-│                         → link_4 → link_5               │
-│                               ├── link_6 (gripper)      │
-│                               ├── end_effector          │
-│                               └── depth_camera (D435)   │
-└─────────────────────────────────────────────────────────┘
-```
-
-**Drive modes:** Swerve (holonomic) · Differential · Ackermann  
-**Arm control:** Velocity-based IK via Pinocchio (Damped Least Squares)  
-**Simulation:** Gazebo Ignition Fortress · single `controller_manager` · 5 ros2_control controllers
+<p align="center">
+  <img src="media/chaska_sim.gif" alt="Chaska Rover simulation" width="720"/>
+</p>
 
 ---
 
@@ -39,7 +24,7 @@ A 4-wheel swerve-drive rover with a 6-DOF robotic arm, simulated in Gazebo Ignit
 | `rover_controller` | Swerve kinematics node, PS5 joy mode switcher |
 | `rover_bringup` | Launch files for rover-only simulation / hardware |
 | `chaska_arm_description` | 6-DOF arm URDF (xacro), meshes, RViz config |
-| `chaska_arm_controller` | Joint velocity node (Pinocchio IK), joystick arm controller |
+| `chaska_arm_controller` | Joint velocity node (Pinocchio IK) |
 | `chaska_vision` | YOLOv8-based object detection (RealSense D435) |
 | `chaska_bringup` | **Unified system** — launch, URDF, and controllers for rover + arm |
 
@@ -47,11 +32,15 @@ A 4-wheel swerve-drive rover with a 6-DOF robotic arm, simulated in Gazebo Ignit
 
 ## Hardware
 
+<p align="center">
+  <img src="media/chaska_real.gif" alt="Chaska Rover real hardware" width="720"/>
+</p>
+
 | Component | Model |
 |-----------|-------|
 | Rover drive | 4-wheel swerve (holonomic) |
 | Arm | 6-DOF: 1 prismatic + 4 revolute + 1 prismatic gripper |
-| 3D LiDAR | Livox (simulated: 16-channel, 360°, 100 m range) |
+| 3D LiDAR | Livox (16-channel, 360°, 100 m range) |
 | RGB-D rover | Forward-facing RGBD camera |
 | RGB-D arm | Intel RealSense D435 on end-effector |
 | IMU | On chassis |
@@ -67,7 +56,7 @@ A 4-wheel swerve-drive rover with a 6-DOF robotic arm, simulated in Gazebo Ignit
 - `joint_trajectory_controller`, `joint_state_broadcaster`
 - `position_controllers`, `velocity_controllers`
 - `robot_state_publisher`, `joint_state_publisher_gui`
-- `pinocchio` (for arm IK)
+- `pinocchio` (arm IK)
 - `joy` (PS5 controller driver)
 
 ---
@@ -90,34 +79,21 @@ source install/setup.bash
 ros2 launch chaska_bringup chaska_simulation.launch.py
 ```
 
-With a specific world:
-
 ```bash
+# With Rubicon world
 ros2 launch chaska_bringup chaska_simulation.launch.py world_name:=rubicon
 ```
-
-Available worlds: `empty` (default), `rubicon`
 
 ### URDF visualization (no Gazebo)
 
 ```bash
-# Rover + arm — adjust arm mount position
 ros2 launch chaska_bringup chaska_display.launch.py
-
-# Arm only
-ros2 launch chaska_arm_controller visualize.launch.py
 ```
 
 ### Rover only
 
 ```bash
 ros2 launch rover_bringup rover_simulation.launch.py
-```
-
-### Kill simulation
-
-```bash
-pkill -f "ign gazebo"; pkill -f "ros2"
 ```
 
 ---
@@ -132,15 +108,18 @@ pkill -f "ign gazebo"; pkill -f "ros2"
 | □ Square | Differential mode (skid-steer) |
 | ○ Circle | Ackermann mode (car-like steering) |
 | ✕ Cross | Switch to arm mode |
+| L1 + sticks | Move (deadman switch) |
+| L1 + R1 + sticks | Turbo (2× speed) |
 
 ### Arm mode (after pressing Cross)
 
 | Input | Action |
 |-------|--------|
-| Left stick X | End-effector velocity X (lateral) |
-| Left stick Y | End-effector velocity Z (up/down) |
-| Right stick X | End-effector velocity Y (forward/back) |
-| R2 trigger | Wrist rotation (joint 5) |
+| Left stick X/Y | End-effector lateral / forward-back (IK) |
+| Right stick Y | End-effector height (IK) |
+| D-pad ↑/↓ | Wrist pitch (joint 4) |
+| D-pad ←/→ | Wrist roll (joint 5) |
+| R1 / L1 | Gripper open / close |
 | ✕ Cross | Return to rover mode |
 
 ---
@@ -157,48 +136,4 @@ pkill -f "ign gazebo"; pkill -f "ros2"
 | `/depth_camera/points` | `PointCloud2` | Arm RealSense D435 |
 | `/imu` | `Imu` | Chassis IMU |
 
-> RViz displays for these topics require **Reliability Policy: Best Effort** (ros_gz_bridge publishes Best Effort).
-
----
-
-## Controllers
-
-```bash
-ros2 control list_controllers
-```
-
-| Controller | Type | Joints |
-|-----------|------|--------|
-| `joint_state_broadcaster` | JointStateBroadcaster | all |
-| `yaw_position_controller` | JointGroupPositionController | FL/FR/RL/RR yaw (×4) |
-| `wheel_velocity_controller` | JointGroupVelocityController | FL/FR/RL/RR wheel (×4) |
-| `arm_controller` | JointTrajectoryController | joint_1..joint_5 |
-| `gripper_controller` | JointTrajectoryController | joint_6 |
-
----
-
-## Diagnostics
-
-```bash
-# Controller status
-ros2 control list_controllers
-
-# TF tree
-ros2 run tf2_tools view_frames && evince frames.pdf
-
-# Joint states (rover + arm in one topic)
-ros2 topic echo /joint_states --once
-
-# Gamepad detection
-ros2 run joy joy_enumerate_devices
-```
-
----
-
-## Roadmap
-
-- [ ] Arm joystick → `arm_controller` bridge in simulation (IK → JointTrajectory)
-- [ ] Odometry — EKF fusing GPS + IMU via `robot_localization`
-- [ ] Nav2 go-to-goal navigation
-- [ ] Real hardware drivers (replace `mock_components/GenericSystem`)
-- [ ] Elevation mapping for traversability estimation
+> RViz displays require **Reliability Policy: Best Effort** (ros_gz_bridge QoS).
