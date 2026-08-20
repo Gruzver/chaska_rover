@@ -140,8 +140,20 @@ ros2 launch rover_bringup rover_simulation.launch.py
 
 ---
 
-## Hardware Design Tools
+## Sponsors
 
-The rover's custom electronics are designed with
-[**EasyEDA Professional**](https://easyeda.com/) for schematic capture and PCB layout,
-and prototype boards are fabricated by [**JLCPCB**](https://jlcpcb.com/).
+This project is supported by the following partners:
+
+<p align="center">
+  <a href="https://easyeda.com/">
+    <img src="media/easyeda-logo.png" alt="EasyEDA" height="34"/>
+  </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://jlcpcb.com/">
+    <img src="media/jlcpcb-logo.png" alt="JLCPCB" height="34"/>
+  </a>
+</p>
+
+The rover's custom electronics are designed with [**EasyEDA Professional**](https://easyeda.com/),
+an online EDA platform for schematic capture and PCB layout, and prototype boards are fabricated by
+[**JLCPCB**](https://jlcpcb.com/), providing fast and reliable PCB manufacturing for rapid hardware iteration.
