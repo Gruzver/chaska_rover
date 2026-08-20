@@ -137,3 +137,11 @@ ros2 launch rover_bringup rover_simulation.launch.py
 | `/imu` | `Imu` | Chassis IMU |
 
 > RViz displays require **Reliability Policy: Best Effort** (ros_gz_bridge QoS).
+
+---
+
+## Hardware Design Tools
+
+The rover's custom electronics are designed with
+[**EasyEDA Professional**](https://easyeda.com/) for schematic capture and PCB layout,
+and prototype boards are fabricated by [**JLCPCB**](https://jlcpcb.com/).
